@@ -19,6 +19,8 @@ allprojects {
     }
 }
 
+val escapedProjectDir = projectDir.toString().replace("\\", "/")
+
 subprojects {
     apply {
         plugin("io.gitlab.arturbosch.detekt")
@@ -41,19 +43,19 @@ subprojects {
     }
 
     detekt {
+        input = files(escapedProjectDir)
         config = rootProject.files("config/detekt/detekt.yml")
-        reports {
-            html {
-                enabled = true
-                destination = file("build/reports/detekt.html")
-            }
-        }
+        parallel = true
     }
 }
 
 tasks {
     register("clean", Delete::class.java) {
         delete(rootProject.buildDir)
+    }
+
+    withType<io.gitlab.arturbosch.detekt.Detekt> {
+        exclude("**/build/**")
     }
 
     withType<DependencyUpdatesTask> {
